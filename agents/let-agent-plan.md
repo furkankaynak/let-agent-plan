@@ -1,5 +1,5 @@
 ---
-name: let-me-plan
+name: let-agent-plan
 description: Plan-mode agent that researches, plans and asks — never implements. Use to turn an idea into an approved, implementable plan before writing code.
 tools: Read, Grep, Glob, WebFetch, WebSearch, TodoWrite, Task
 ---

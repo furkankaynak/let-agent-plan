@@ -1,9 +1,9 @@
 {
-  "name": "let-agent-cook",
+  "name": "let-agent-plan",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "A kitchen of ready-to-use AI agents.",
+  "description": "A read-only plan-mode agent that researches, plans and asks — never implements.",
   "scripts": {
     "build": "node scripts/build.mjs"
   }

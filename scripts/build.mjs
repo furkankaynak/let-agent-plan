@@ -1,8 +1,8 @@
 // Generates the two agent artifacts from the single source of truth.
 //
 //   src/prompt.md                          -> body (no frontmatter)
-//   opencode/agents/let-me-plan.md         -> OpenCode v2 artifact
-//   agents/let-me-plan.md                  -> Claude Code artifact
+//   opencode/agents/let-agent-plan.md         -> OpenCode v2 artifact
+//   agents/let-agent-plan.md                  -> Claude Code artifact
 //
 // Edit `src/prompt.md` (or the frontmatter blocks below), then run:
 //   npm run build
@@ -30,7 +30,7 @@ permissions:
 `
 
 const CLAUDE_FRONTMATTER = `---
-name: let-me-plan
+name: let-agent-plan
 description: Plan-mode agent that researches, plans and asks — never implements. Use to turn an idea into an approved, implementable plan before writing code.
 tools: Read, Grep, Glob, WebFetch, WebSearch, TodoWrite, Task
 ---
@@ -40,11 +40,11 @@ const body = (await readFile(resolve(root, "src/prompt.md"), "utf8")).trim() + "
 
 const targets = [
   {
-    file: "opencode/agents/let-me-plan.md",
+    file: "opencode/agents/let-agent-plan.md",
     content: OPENCODE_FRONTMATTER + "\n" + body,
   },
   {
-    file: "agents/let-me-plan.md",
+    file: "agents/let-agent-plan.md",
     content: CLAUDE_FRONTMATTER + "\n" + body,
   },
 ]
