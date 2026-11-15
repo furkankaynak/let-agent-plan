@@ -1,0 +1,14 @@
+{
+  "name": "let-agent-cook",
+  "description": "A kitchen of ready-to-use AI agents. Install let-me-plan, a read-only plan-mode agent that researches, plans and asks — never implements.",
+  "owner": {
+    "name": "Furkan Kaynak"
+  },
+  "plugins": [
+    {
+      "name": "let-agent-cook",
+      "source": "./",
+      "description": "Ships let-me-plan, a read-only plan-mode agent (subagent, also runnable as the main session agent)."
+    }
+  ]
+}

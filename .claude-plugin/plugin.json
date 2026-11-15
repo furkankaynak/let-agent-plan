@@ -1,0 +1,9 @@
+{
+  "name": "let-agent-cook",
+  "description": "A kitchen of ready-to-use AI agents. Ships let-me-plan, a read-only plan-mode agent that researches, plans and asks — never implements.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Furkan Kaynak"
+  },
+  "license": "MIT"
+}
