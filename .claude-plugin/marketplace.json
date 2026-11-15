@@ -8,7 +8,9 @@
     {
       "name": "let-agent-plan",
       "source": "./",
-      "description": "A read-only plan-mode agent (subagent, also runnable as the main session agent)."
+      "description": "A read-only plan-mode agent (subagent, also runnable as the main session agent).",
+      "category": "agents",
+      "tags": ["planning", "plan", "read-only", "architecture"]
     }
   ]
 }

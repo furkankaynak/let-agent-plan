@@ -1,9 +1,12 @@
 {
   "name": "let-agent-plan",
   "description": "A read-only plan-mode agent that researches, plans and asks — never implements.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": {
     "name": "Furkan Kaynak"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "homepage": "https://github.com/furkankaynak/let-agent-plan",
+  "repository": "https://github.com/furkankaynak/let-agent-plan",
+  "keywords": ["planning", "plan", "agent", "architecture", "claude-code", "opencode"]
 }

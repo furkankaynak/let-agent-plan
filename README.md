@@ -137,13 +137,16 @@ opencode/agents/planner.md      # OpenCode v2 artifact (generated)
 agents/planner.md               # Claude Code artifact (generated)
 .claude-plugin/plugin.json      # Claude Code plugin manifest
 .claude-plugin/marketplace.json # Claude Code marketplace catalog
+.claude-plugin/icon.png         # plugin icon (generated)
+scripts/gen-icon.mjs            # generates the plugin icon
 ```
 
-The two agent files are generated. To regenerate them after editing
-`src/prompt.md`:
+The agent files and the icon are generated. To regenerate them after editing
+`src/prompt.md` or the icon design:
 
 ```sh
-npm run build
+npm run build   # regenerate the agent artifacts
+npm run icon    # regenerate the plugin icon
 ```
 
 ## License
