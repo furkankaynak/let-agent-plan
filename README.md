@@ -4,6 +4,9 @@ A read-only plan-mode agent that researches, plans and asks clarifying questions
 and never implements. It runs as a **primary agent** in OpenCode v2 and as a
 **subagent** (or main session agent) in Claude Code.
 
+The agent is named **`planner`**. In Claude Code it appears scoped under the
+plugin name as `let-agent-plan:planner`.
+
 ---
 
 ## Install
@@ -14,19 +17,19 @@ Copy (or symlink) the agent into your global agents directory:
 
 ```sh
 mkdir -p ~/.config/opencode/agents
-cp opencode/agents/let-agent-plan.md ~/.config/opencode/agents/let-agent-plan.md
+cp opencode/agents/planner.md ~/.config/opencode/agents/planner.md
 
 # or, to keep it linked to this checkout:
-ln -sf "$PWD/opencode/agents/let-agent-plan.md" ~/.config/opencode/agents/let-agent-plan.md
+ln -sf "$PWD/opencode/agents/planner.md" ~/.config/opencode/agents/planner.md
 ```
 
-Then open OpenCode and switch to the `let-agent-plan` agent (Tab / agent picker),
-or set it as the default in `opencode.jsonc`:
+Then open OpenCode and switch to the `planner` agent (Tab / agent picker), or set
+it as the default in `opencode.jsonc`:
 
 ```jsonc
 {
   "$schema": "https://opencode.ai/config.json",
-  "default_agent": "let-agent-plan"
+  "default_agent": "planner"
 }
 ```
 
@@ -42,10 +45,10 @@ claude plugin install let-agent-plan@let-agent-plan
 Use it as the main session agent:
 
 ```sh
-claude --agent let-agent-plan:let-agent-plan
+claude --agent let-agent-plan:planner
 ```
 
-Or invoke it as a subagent with `@let-agent-plan:let-agent-plan` in the prompt.
+Or invoke it as a subagent with `@let-agent-plan:planner` in the prompt.
 
 > If your fork lives under a different GitHub owner, swap `furkankaynak` in the
 > `marketplace add` command for your own.
@@ -62,12 +65,12 @@ Or invoke it as a subagent with `@let-agent-plan:let-agent-plan` in the prompt.
 ## Repo layout
 
 ```
-src/prompt.md                       # single source of truth (the agent's system prompt)
-scripts/build.mjs                   # generates the two artifacts below
-opencode/agents/let-agent-plan.md   # OpenCode v2 artifact (generated)
-agents/let-agent-plan.md            # Claude Code artifact (generated)
-.claude-plugin/plugin.json          # Claude Code plugin manifest
-.claude-plugin/marketplace.json     # Claude Code marketplace catalog
+src/prompt.md                   # single source of truth (the agent's system prompt)
+scripts/build.mjs               # generates the two artifacts below
+opencode/agents/planner.md      # OpenCode v2 artifact (generated)
+agents/planner.md               # Claude Code artifact (generated)
+.claude-plugin/plugin.json      # Claude Code plugin manifest
+.claude-plugin/marketplace.json # Claude Code marketplace catalog
 ```
 
 The two agent files are generated. To regenerate them after editing
