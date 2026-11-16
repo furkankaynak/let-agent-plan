@@ -1,4 +1,4 @@
-// Generates the plugin icon at .claude-plugin/icon.png (1024x1024, RGBA PNG).
+// Generates the plugin icon at claude/.claude-plugin/icon.png (1024x1024, RGBA PNG).
 //
 // Design: a rounded square with a diagonal indigo->violet gradient and a bold
 // white check mark. Pure Node (zlib + a small PNG encoder), no dependencies.
@@ -128,7 +128,7 @@ const png = Buffer.concat([
   chunk("IEND", Buffer.alloc(0)),
 ])
 
-const out = resolve(root, ".claude-plugin/icon.png")
+const out = resolve(root, "claude/.claude-plugin/icon.png")
 mkdirSync(dirname(out), { recursive: true })
 writeFileSync(out, png)
 console.log(`wrote ${out} (${png.length} bytes)`)

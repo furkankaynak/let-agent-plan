@@ -1,24 +1,14 @@
-// Generates two agents and a Claude Code skill from the single source of truth.
-//
-//   src/prompt.md            -> body (harness-specific placeholders templated)
-//   scripts/harnesses.json   -> artifact path, question tool, plans directory
-//   opencode/agents/planner.md -> OpenCode v2 artifact
-//   agents/planner.md          -> Claude Code artifact
-//   skills/let-agent-plan/SKILL.md -> Claude Code inline skill
-//
-// The frontmatter lives here in FRONTMATTER (it is NOT in src/prompt.md).
-// Edit `src/prompt.md`, `scripts/harnesses.json`, or the frontmatter below,
-// then run:
-//   npm run build
+// Generates all harness artifacts from src/prompt.md and scripts/harnesses.json.
+// Frontmatter belongs here, not in the source prompt. Run: npm run build
 
 import { readFile, writeFile, mkdir } from "node:fs/promises"
-import { dirname, resolve } from "node:path"
+import { dirname, isAbsolute, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 
 const FRONTMATTER = {
-  opencode: `---
+  "opencode-agent": `---
 description: Plan-mode agent that researches, plans and asks — never implements
 mode: primary
 permissions:
@@ -33,45 +23,78 @@ permissions:
     effect: allow
 ---
 `,
-  claude: `---
+  "claude-agent": `---
 name: planner
 description: Plan-mode agent that researches, plans and asks — never implements. Use to turn an idea into an approved, implementable plan before writing code.
 tools: Read, Grep, Glob, WebFetch, WebSearch, TodoWrite, Task, AskUserQuestion, Write
 ---
 `,
-}
-
-const harnesses = JSON.parse(
-  await readFile(resolve(root, "scripts/harnesses.json"), "utf8")
-)
-
-const body = (await readFile(resolve(root, "src/prompt.md"), "utf8")).trim() + "\n"
-
-const SKILL_FRONTMATTER = `---
-name: let-agent-plan
+  "claude-skill": `---
+name: plan
 description: Research an idea, ask clarifying questions, and produce an implementable plan without implementing it.
 disable-model-invocation: true
 ---
-`
+`,
+  skill: `---
+name: let-agent-plan
+description: Research an idea, ask clarifying questions, and produce an implementable plan without implementing it. Use when planning a project or feature before writing code.
+---
+`,
+}
 
-for (const [name, config] of Object.entries(harnesses)) {
-  if (!(name in FRONTMATTER)) {
-    throw new Error(`no frontmatter defined for harness "${name}"`)
+export function renderArtifacts(prompt, harnesses) {
+  const artifacts = []
+  const paths = new Set()
+  const body = prompt.trim() + "\n"
+
+  if (!harnesses || typeof harnesses !== "object" || Array.isArray(harnesses) || !Object.keys(harnesses).length) {
+    throw new Error("no harness profiles defined")
   }
 
-  const renderedBody = body
-    .replaceAll("{{QUESTION_TOOL}}", config.questionTool)
-    .replaceAll("{{PLANS_DIRECTORY}}", config.plansDirectory)
+  for (const [name, config] of Object.entries(harnesses)) {
+    if (!config?.replacements || !Array.isArray(config.artifacts) || !config.artifacts.length) {
+      throw new Error(`harness "${name}" needs replacements and artifacts`)
+    }
 
-  const targets = [{ file: config.artifact, frontmatter: FRONTMATTER[name] }]
-  if (config.skillArtifact) {
-    targets.push({ file: config.skillArtifact, frontmatter: SKILL_FRONTMATTER })
+    const renderedBody = body.replace(/\{\{([A-Z_]+)\}\}/g, (placeholder, key) => {
+      const value = config.replacements[key]
+      if (typeof value !== "string" || !value.trim()) {
+        throw new Error(`harness "${name}" has no replacement for ${placeholder}`)
+      }
+      return value
+    })
+    if (/\{\{[^{}]+\}\}/.test(renderedBody)) {
+      throw new Error(`harness "${name}" has unresolved placeholders`)
+    }
+
+    for (const { file, frontmatter } of config.artifacts) {
+      if (!Object.hasOwn(FRONTMATTER, frontmatter)) {
+        throw new Error(`unknown frontmatter "${frontmatter}" in harness "${name}"`)
+      }
+      if (typeof file !== "string" || !file.endsWith(".md") || isAbsolute(file) || file.includes("\\")) {
+        throw new Error(`invalid artifact path in harness "${name}": ${file}`)
+      }
+      const path = resolve(root, file)
+      if (relative(root, path).startsWith("..")) {
+        throw new Error(`artifact path escapes repository: ${file}`)
+      }
+      if (paths.has(path)) throw new Error(`duplicate artifact path: ${file}`)
+      paths.add(path)
+      artifacts.push({ file, content: FRONTMATTER[frontmatter] + "\n" + renderedBody })
+    }
   }
 
-  for (const { file, frontmatter } of targets) {
+  return artifacts
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const harnesses = JSON.parse(await readFile(resolve(root, "scripts/harnesses.json"), "utf8"))
+  const prompt = await readFile(resolve(root, "src/prompt.md"), "utf8")
+  // Validate every target before writing any files.
+  for (const { file, content } of renderArtifacts(prompt, harnesses)) {
     const path = resolve(root, file)
     await mkdir(dirname(path), { recursive: true })
-    await writeFile(path, frontmatter + "\n" + renderedBody)
+    await writeFile(path, content)
     console.log(`wrote ${file}`)
   }
 }

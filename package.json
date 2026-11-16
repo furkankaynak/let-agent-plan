@@ -1,11 +1,12 @@
 {
   "name": "let-agent-plan",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": true,
   "type": "module",
   "description": "A read-only plan-mode agent that researches, plans and asks — never implements.",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "icon": "node scripts/gen-icon.mjs"
+    "icon": "node scripts/gen-icon.mjs",
+    "test": "node --test scripts/build.test.mjs"
   }
 }

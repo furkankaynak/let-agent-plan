@@ -1,13 +1,30 @@
 {
   "opencode": {
-    "artifact": "opencode/agents/planner.md",
-    "questionTool": "question",
-    "plansDirectory": ".opencode/plans"
+    "replacements": {
+      "QUESTION_POLICY": "Ask every question through the `question` tool — never write questions as plain text.",
+      "PLANS_DIRECTORY": ".opencode/plans"
+    },
+    "artifacts": [
+      { "file": "opencode/agents/planner.md", "frontmatter": "opencode-agent" }
+    ]
   },
   "claude": {
-    "artifact": "agents/planner.md",
-    "skillArtifact": "skills/let-agent-plan/SKILL.md",
-    "questionTool": "AskUserQuestion",
-    "plansDirectory": ".claude/plans"
+    "replacements": {
+      "QUESTION_POLICY": "Ask every question through the `AskUserQuestion` tool — never write questions as plain text.",
+      "PLANS_DIRECTORY": ".claude/plans"
+    },
+    "artifacts": [
+      { "file": "claude/agents/planner.md", "frontmatter": "claude-agent" },
+      { "file": "claude/skills/plan/SKILL.md", "frontmatter": "claude-skill" }
+    ]
+  },
+  "generic": {
+    "replacements": {
+      "QUESTION_POLICY": "Use the current harness's question tool when one is available and callable in this session. Otherwise, ask the same questions as plain text in the conversation. In either case, stop and wait for the user's answers before continuing; never invent answers or skip clarification because a tool is unavailable.",
+      "PLANS_DIRECTORY": "plans"
+    },
+    "artifacts": [
+      { "file": "skills/let-agent-plan/SKILL.md", "frontmatter": "skill" }
+    ]
   }
 }

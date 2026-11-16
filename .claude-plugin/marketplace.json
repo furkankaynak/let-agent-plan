@@ -7,8 +7,8 @@
   "plugins": [
     {
       "name": "let-agent-plan",
-      "source": "./",
-      "description": "A read-only plan-mode agent (subagent, also runnable as the main session agent).",
+      "source": "./claude",
+      "description": "An interactive planning skill and a read-only planner agent for Claude Code.",
       "category": "agents",
       "tags": ["planning", "plan", "read-only", "architecture"]
     }
