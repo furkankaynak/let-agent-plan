@@ -22,8 +22,8 @@ test("all four committed artifacts match the shared source and have no placehold
 })
 
 test("native policies and frontmatter stay harness-specific", () => {
-  const claude = artifact("claude/skills/plan/SKILL.md")
-  assert.match(claude, /^name: plan$/m)
+  const claude = artifact("claude/skills/planner/SKILL.md")
+  assert.match(claude, /^name: planner$/m)
   assert.match(claude, /disable-model-invocation: true/)
   assert.match(claude, /Ask every question through the `AskUserQuestion` tool — never write questions as plain text\./)
   assert.match(claude, /`\.claude\/plans\//)
@@ -36,8 +36,8 @@ test("native policies and frontmatter stay harness-specific", () => {
 })
 
 test("portable skill waits for answers and falls back to chat without native dependencies", () => {
-  const generic = artifact("skills/let-agent-plan/SKILL.md")
-  assert.match(generic, /name: let-agent-plan/)
+  const generic = artifact("skills/planner/SKILL.md")
+  assert.match(generic, /^name: planner$/m)
   assert.match(generic, /question tool when one is available and callable/)
   assert.match(generic, /Otherwise, ask the same questions as plain text in the conversation/)
   assert.match(generic, /stop and wait for the user's answers before continuing/)
@@ -52,7 +52,7 @@ test("a new skill-only harness needs no new frontmatter or agent", () => {
   const extended = structuredClone(harnesses)
   extended.example = {
     replacements: { QUESTION_POLICY: "Ask and wait.", PLANS_DIRECTORY: "example/plans" },
-    artifacts: [{ file: "example/skills/let-agent-plan/SKILL.md", frontmatter: "skill" }],
+    artifacts: [{ file: "example/skills/planner/SKILL.md", frontmatter: "skill" }],
   }
   const result = renderArtifacts(prompt, extended)
   assert.equal(result.length, 5)
@@ -97,6 +97,8 @@ test("marketplace points to a self-contained plugin with stable published names"
   assert.deepEqual((await readdir(resolve(root, ".claude-plugin"))).filter((name) => name !== ".DS_Store"), ["marketplace.json"])
   await assert.rejects(stat(resolve(root, "agents/planner.md")), { code: "ENOENT" })
   await assert.rejects(stat(resolve(root, "claude/skills/let-agent-plan/SKILL.md")), { code: "ENOENT" })
+  await assert.rejects(stat(resolve(root, "claude/skills/plan/SKILL.md")), { code: "ENOENT" })
+  await assert.rejects(stat(resolve(root, "skills/let-agent-plan/SKILL.md")), { code: "ENOENT" })
   assert.ok((await stat(resolve(root, "claude/.claude-plugin/icon.png"))).size > 0)
 })
 
@@ -105,14 +107,14 @@ test("README recommendations, guide links and release paths stay current", async
   const alternative = readme.indexOf("## Alternative: skill-only installation via skills.sh")
   assert.ok(alternative > readme.indexOf("## Claude Code — recommended: plugin"))
   assert.ok(alternative > readme.indexOf("## OpenCode v2 — recommended: primary agent"))
-  assert.match(readme, /--skill let-agent-plan/)
-  assert.match(readme, /\/let-agent-plan:plan /)
+  assert.match(readme, /--skill planner/)
+  assert.match(readme, /\/let-agent-plan:planner /)
   assert.doesNotMatch(readme, /let-agent-plan:let-agent-plan/)
   const maintenance = await read("AGENTS.md")
   assert.match(maintenance, /claude plugin tag \.\/claude --push/)
   assert.match(maintenance, /claude\/\.claude-plugin\/plugin.json/)
   assert.doesNotMatch(maintenance, /claude plugin tag \.claude-plugin/)
-  for (const file of ["README.md", "claude/README.md", "opencode/README.md", "skills/let-agent-plan/README.md"]) {
+  for (const file of ["README.md", "claude/README.md", "opencode/README.md", "skills/planner/README.md"]) {
     const text = await read(file)
     for (const [, link] of text.matchAll(/\]\(([^)]+)\)/g)) {
       if (/^(https?:|#)/.test(link)) continue
@@ -124,5 +126,5 @@ test("README recommendations, guide links and release paths stay current", async
 test("standalone distributions include the repository license", async () => {
   const license = await read("LICENSE")
   assert.equal(await read("claude/LICENSE"), license)
-  assert.equal(await read("skills/let-agent-plan/LICENSE"), license)
+  assert.equal(await read("skills/planner/LICENSE"), license)
 })

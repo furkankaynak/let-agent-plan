@@ -30,13 +30,13 @@ tools: Read, Grep, Glob, WebFetch, WebSearch, TodoWrite, Task, AskUserQuestion, 
 ---
 `,
   "claude-skill": `---
-name: plan
+name: planner
 description: Research an idea, ask clarifying questions, and produce an implementable plan without implementing it.
 disable-model-invocation: true
 ---
 `,
   skill: `---
-name: let-agent-plan
+name: planner
 description: Research an idea, ask clarifying questions, and produce an implementable plan without implementing it. Use when planning a project or feature before writing code.
 ---
 `,

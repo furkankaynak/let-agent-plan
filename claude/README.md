@@ -36,7 +36,7 @@ claude plugin install let-agent-plan@let-agent-plan
 Start a normal Claude session (not built-in Plan mode), then invoke:
 
 ```text
-/let-agent-plan:plan plan this feature for me
+/let-agent-plan:planner plan this feature for me
 ```
 
 The skill runs in the current conversation, starts only when invoked and uses
@@ -54,6 +54,20 @@ The agent also appears as `@let-agent-plan:planner`, but subagents cannot call
 planning. Saving to `.claude/plans/` requires approval; if blocked, the full plan
 is delivered in chat.
 
+## Why the plugin prefix?
+
+Claude Code loads plugin skills under `/plugin-name:skill-name`, so the skill
+command is `/let-agent-plan:planner`. There is no documented manifest option to
+export it as an unscoped `/planner`. The agent is also named `planner`, but it
+is a separate component, selected with `--agent` or `@let-agent-plan:planner`.
+
+For `/planner` without a prefix, install a standalone skill under your project's
+`.claude/skills/planner/` or your personal `~/.claude/skills/planner/`, rather than
+as a plugin skill. The [portable distribution](../skills/planner/README.md) is
+one option; it uses `plans/` and a generic question policy instead of the
+Claude-specific profile. Avoid loading both variants in the same session.
+See [Claude's skills documentation](https://code.claude.com/docs/en/skills#where-skills-live).
+
 ## Update
 
 ```sh
@@ -63,7 +77,9 @@ claude plugin update let-agent-plan@let-agent-plan
 
 Start a new session or reload plugins to use the updated copy. Moving the plugin
 into `claude/` does not require re-registering the marketplace. The skill command
-is `/let-agent-plan:plan`; the agent remains `let-agent-plan:planner`.
+is `/let-agent-plan:planner`; the agent remains `let-agent-plan:planner`.
+From 0.1.8 onward, use this skill command instead of the former
+`/let-agent-plan:plan` command.
 Direct references to the former root agent file must use the new path.
 
 ## Local development

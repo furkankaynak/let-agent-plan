@@ -15,8 +15,8 @@ no dependencies or lint/typecheck. Tests use Node's built-in test runner.
 - `npm run build` regenerates:
   - `opencode/agents/planner.md` → OpenCode v2 artifact
   - `claude/agents/planner.md` → Claude Code artifact
-  - `claude/skills/plan/SKILL.md` → Claude inline skill, `/let-agent-plan:plan`
-  - `skills/let-agent-plan/SKILL.md` → portable skills.sh skill
+  - `claude/skills/planner/SKILL.md` → Claude inline skill, `/let-agent-plan:planner`
+  - `skills/planner/SKILL.md` → portable skills.sh skill
 - Never hand-edit the generated `*.md`; changes are overwritten on the next build.
 - Native profiles keep their exact question-tool policies and plan directories.
   The generic profile uses a question tool when callable, otherwise asks in chat
@@ -25,13 +25,16 @@ no dependencies or lint/typecheck. Tests use Node's built-in test runner.
 ## Distribution boundaries
 - `claude/` is the self-contained plugin root: manifest, icon, agent, skill, guide.
 - `opencode/` contains the OpenCode agent and guide. Its artifact path is stable.
-- `skills/let-agent-plan/` contains the portable skill and its guide.
+- `skills/planner/` contains the portable skill and its guide.
 - Root `.claude-plugin/marketplace.json` remains the stable discovery entry;
   its plugin source is `./claude`. Do not move it or rename either published name.
-- The Claude skill uses `name: plan`; the portable skill uses `name: let-agent-plan`.
-  The skills CLI can discover the native skill through the marketplace, too.
-  Document `--skill let-agent-plan` to explicitly select the portable variant;
-  recheck the installed contents whenever layout or installer behavior changes.
+- All skills and agents are named `planner`. The plugin/repository name stays
+  `let-agent-plan`; plugin skills are namespaced as `/let-agent-plan:planner`.
+  The skills CLI can discover both same-named skills. It currently searches root
+  `skills/` first and deduplicates names; `--skill planner` alone does not isolate
+  the portable variant from a future discovery-order change. Recheck installed
+  contents when layout or installer behavior changes. An explicit source of
+  `skills/planner/` bypasses repository-wide discovery.
 - Keep skill-only installation below the recommended native installations in
   the root README. Update the per-distribution READMEs when behavior changes.
 - Standalone Claude and portable skill packages include copies of `LICENSE`;
@@ -56,8 +59,8 @@ Bump both together (patch convention); commit message ends with `(x.y.z)`.
    through the marketplace as well as directly; check upgrading an older install
    in an isolated environment without changing the user's actual installation.
 3. Test a project-local install with the current skills CLI from the repository
-   root, selecting `let-agent-plan`. Record the CLI version and compare the
-   installed `SKILL.md` with `skills/let-agent-plan/SKILL.md`, not the Claude copy.
+   root, selecting `planner`. Record the CLI version and compare the
+   installed `SKILL.md` with `skills/planner/SKILL.md`, not the Claude copy.
    Also check the explicit generic skill directory install. Keep test installs
    outside this repository and the user's normal agent configuration.
 4. Preview the tag with `claude plugin tag ./claude --dry-run`. On a dirty tree

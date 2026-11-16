@@ -15,7 +15,7 @@
     },
     "artifacts": [
       { "file": "claude/agents/planner.md", "frontmatter": "claude-agent" },
-      { "file": "claude/skills/plan/SKILL.md", "frontmatter": "claude-skill" }
+      { "file": "claude/skills/planner/SKILL.md", "frontmatter": "claude-skill" }
     ]
   },
   "generic": {
@@ -24,7 +24,7 @@
       "PLANS_DIRECTORY": "plans"
     },
     "artifacts": [
-      { "file": "skills/let-agent-plan/SKILL.md", "frontmatter": "skill" }
+      { "file": "skills/planner/SKILL.md", "frontmatter": "skill" }
     ]
   }
 }

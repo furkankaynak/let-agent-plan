@@ -23,13 +23,18 @@ claude plugin install let-agent-plan@let-agent-plan
 then invoke the skill in your conversation:
 
 ```text
-/let-agent-plan:plan plan this feature for me
+/let-agent-plan:planner plan this feature for me
 ```
 
 The plugin installs both the skill and the existing agent. The skill starts
 only when you invoke it and runs in the current conversation, not a forked
 subagent, so questions and answers stay in the same session. It does not impose
 tool restrictions; normal session permissions apply.
+
+Claude Code namespaces plugin skills as `/plugin-name:skill-name`; the plugin's
+skill is therefore `/let-agent-plan:planner`. There is no documented plugin
+setting to remove that prefix. A standalone project or personal skill can be
+invoked as `/planner` instead; see the [skill naming documentation](https://code.claude.com/docs/en/skills#where-skills-live).
 
 Alternatively, run the existing agent as the main session agent:
 
@@ -107,12 +112,12 @@ scripts/harnesses.json                     # profile replacements and outputs
 claude/.claude-plugin/plugin.json          # Claude plugin manifest
 claude/.claude-plugin/icon.png             # generated icon
 claude/agents/planner.md                   # generated Claude agent
-claude/skills/plan/SKILL.md                 # generated Claude-only skill
+claude/skills/planner/SKILL.md              # generated Claude-only skill
 claude/README.md                           # Claude guide
 opencode/agents/planner.md                 # generated OpenCode agent
 opencode/README.md                         # OpenCode guide
-skills/let-agent-plan/SKILL.md              # generated portable skill
-skills/let-agent-plan/README.md             # portable skill guide
+skills/planner/SKILL.md                     # generated portable skill
+skills/planner/README.md                    # portable skill guide
 ```
 
 The agents, skills and icon are generated. To regenerate them after editing
@@ -134,10 +139,17 @@ for validation and release instructions.
 
 The Claude plugin moved under `claude/`. Its marketplace name, plugin name and
 `let-agent-plan:planner` agent are unchanged. Invoke the Claude skill as
-`/let-agent-plan:plan`. Existing plugin users should update the marketplace and plugin; they
+`/let-agent-plan:planner`. Existing plugin users should update the marketplace and plugin; they
 do not need a new marketplace registration. The old root `agents/planner.md`
-path is no longer shipped. The root `skills/let-agent-plan/` now contains the
-portable variant, not the Claude plugin's skill.
+path is no longer shipped. The portable variant lives under `skills/planner/`,
+not inside the Claude plugin.
+
+As of 0.1.8, every skill and agent is named `planner`. The Claude skill command
+changes from `/let-agent-plan:plan` to `/let-agent-plan:planner`. Existing
+standalone `let-agent-plan` skill installs need migration, not just an update:
+remove the old skill in its installed scope and install `planner` instead. See
+the [portable skill guide](skills/planner/README.md). The plugin and repository
+names stay `let-agent-plan`; the Claude agent name is unchanged.
 
 ## Alternative: skill-only installation via skills.sh
 
@@ -149,7 +161,7 @@ Requires Node.js compatible with the skills CLI (the current upstream docs
 specify 22.20+). Install from this public GitHub repository:
 
 ```sh
-npx skills add furkankaynak/let-agent-plan --skill let-agent-plan
+npx skills add furkankaynak/let-agent-plan --skill planner
 ```
 
 Choose your agent when prompted. Installation is project-local by default;
@@ -163,9 +175,9 @@ at the project root, or returns the full plan in chat if writing is blocked.
 Invocation and permissions depend on your agent; compatibility is not guaranteed
 for every agent supported by the installer.
 
-See the [portable skill guide](skills/let-agent-plan/README.md) for explicit agent
+See the [portable skill guide](skills/planner/README.md) for explicit agent
 selection, updates and removal. The intended directory page is
-[skills.sh/furkankaynak/let-agent-plan/let-agent-plan](https://skills.sh/furkankaynak/let-agent-plan/let-agent-plan).
+[skills.sh/furkankaynak/let-agent-plan/planner](https://skills.sh/furkankaynak/let-agent-plan/planner).
 Installation uses GitHub directly and does not depend on that page being indexed.
 skills.sh lists skills through installation telemetry; visibility and cache
 refreshes may lag behind a successful install. There is no separate npm publish.
