@@ -59,6 +59,16 @@ Or start Claude Code normally and mention it as a subagent in your prompt:
 @let-agent-plan:planner plan this feature for me
 ```
 
+> [!NOTE]
+> Interactive question-and-answer (the `AskUserQuestion` tool) works in the
+> **main session** (`claude --agent let-agent-plan:planner`). A subagent cannot
+> call `AskUserQuestion`, so run it as the main agent when you want the full
+> question-and-answer planning flow.
+>
+> Saving to `.claude/plans/` is a protected-path write, so Claude Code asks for
+> your approval before creating the plan file. If you decline (or you're in
+> Claude's built-in plan mode), the full plan is still delivered in chat.
+
 ---
 
 ## OpenCode v2
@@ -123,8 +133,11 @@ pick it from the agent list). Or set it as the default in `opencode.jsonc`:
 
 ## What it does
 
-- **Never implements.** Read-only: it researches (files + web), plans and asks —
-  it does not edit your code.
+- **Never implements.** It researches (files + web), plans and asks — it does
+  not edit your source code. Its only write is the finished plan file (below).
+- Saves each finished plan to a Markdown file in the project —
+  `.opencode/plans/` (OpenCode) or `.claude/plans/` (Claude Code) — named
+  `{yyyyMMddHHmm}-let-me-plan-{plan_name}.md`, so it survives the session.
 - Four roles in one: Analyst, Product Owner, Scrum Master, Software Architect.
 - Turns one idea into an approved, implementable plan in a single session.
 
@@ -133,6 +146,7 @@ pick it from the agent list). Or set it as the default in `opencode.jsonc`:
 ```
 src/prompt.md                   # single source of truth (the agent's system prompt)
 scripts/build.mjs               # generates the two artifacts below
+scripts/harnesses.json          # per-harness artifact path, question tool, plans dir
 opencode/agents/planner.md      # OpenCode v2 artifact (generated)
 agents/planner.md               # Claude Code artifact (generated)
 .claude-plugin/plugin.json      # Claude Code plugin manifest

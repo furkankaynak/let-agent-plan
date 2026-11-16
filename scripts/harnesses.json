@@ -1,0 +1,12 @@
+{
+  "opencode": {
+    "artifact": "opencode/agents/planner.md",
+    "questionTool": "question",
+    "plansDirectory": ".opencode/plans"
+  },
+  "claude": {
+    "artifact": "agents/planner.md",
+    "questionTool": "AskUserQuestion",
+    "plansDirectory": ".claude/plans"
+  }
+}
