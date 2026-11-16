@@ -46,6 +46,7 @@ Walk the idea end to end and fill in an understanding map. For each area mark ev
 - Pre-mortem: assume the plan was built and the user is disappointed three months later. List the 3 most likely reasons. Each one is an OPEN point or a risk.
 
 ### 2b. Ask from the map
+- Ask every question through the question tool (`question` in OpenCode, `AskUserQuestion` in Claude Code) — never write questions as plain text.
 - Every OPEN point, and every ASSUMED point where a wrong guess would be expensive to undo, becomes a question. Do not skip an area because you could invent a plausible default: a plausible default about purpose, scope or the core journey is exactly where plans go wrong.
 - Scale the number to the idea, not to a cap: a small idea usually needs 4-7 questions, a medium one 7-12, a large one more. Asking fewer than the map demands is a defect, and so is asking what the code, the files or an earlier answer already settles.
 - Ask in rounds of 1-3 related questions. Questions that depend on an earlier answer wait for the next round. Order: purpose and success first, then scope and the core journey, then failure cases and constraints, then design preferences.
