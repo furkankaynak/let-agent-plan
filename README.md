@@ -1,8 +1,8 @@
 # let-agent-plan
 
-A read-only plan-mode AI agent that researches, plans and asks clarifying
-questions — and never implements. It runs as a **primary agent** in OpenCode v2
-and as a **subagent** (or main session agent) in Claude Code.
+A planning assistant that researches, plans and asks clarifying questions —
+and never implements. It runs as a **primary agent** in OpenCode v2. The Claude
+Code plugin includes both an **inline skill** (recommended) and an **agent**.
 
 The agent is named **`planner`**. In Claude Code it appears scoped under the
 plugin name as `let-agent-plan:planner`.
@@ -38,7 +38,7 @@ Check it works:
 claude --version
 ```
 
-### 2. Install this agent from the marketplace
+### 2. Install the plugin from the marketplace
 
 ```sh
 claude plugin marketplace add furkankaynak/let-agent-plan
@@ -47,27 +47,32 @@ claude plugin install let-agent-plan@let-agent-plan
 
 ### 3. Use it
 
-Run Claude Code with the agent as the main session agent:
+**Recommended:** start Claude Code in normal mode (not built-in Plan mode),
+then invoke the skill in your conversation:
+
+```text
+/let-agent-plan:let-agent-plan plan this feature for me
+```
+
+The plugin installs both the skill and the existing agent. The skill starts
+only when you invoke it and runs in the current conversation, not a forked
+subagent, so questions and answers stay in the same session. It does not impose
+tool restrictions; normal session permissions apply.
+
+Alternatively, run the existing agent as the main session agent:
 
 ```sh
 claude --agent let-agent-plan:planner
 ```
 
-Or start Claude Code normally and mention it as a subagent in your prompt:
-
-```text
-@let-agent-plan:planner plan this feature for me
-```
-
 > [!NOTE]
-> Interactive question-and-answer (the `AskUserQuestion` tool) works in the
-> **main session** (`claude --agent let-agent-plan:planner`). A subagent cannot
-> call `AskUserQuestion`, so run it as the main agent when you want the full
-> question-and-answer planning flow.
+> The agent remains available as `@let-agent-plan:planner`, but subagents
+> cannot call `AskUserQuestion`. For interactive planning, use the skill above
+> or run the agent as the main session.
 >
 > Saving to `.claude/plans/` is a protected-path write, so Claude Code asks for
-> your approval before creating the plan file. If you decline (or you're in
-> Claude's built-in plan mode), the full plan is still delivered in chat.
+> your approval before creating the plan file. If saving is denied or blocked,
+> the full plan is still delivered in chat.
 
 ---
 
@@ -145,21 +150,22 @@ pick it from the agent list). Or set it as the default in `opencode.jsonc`:
 
 ```
 src/prompt.md                   # single source of truth (the agent's system prompt)
-scripts/build.mjs               # generates the two artifacts below
+scripts/build.mjs               # generates the agents and skill below
 scripts/harnesses.json          # per-harness artifact path, question tool, plans dir
 opencode/agents/planner.md      # OpenCode v2 artifact (generated)
 agents/planner.md               # Claude Code artifact (generated)
+skills/let-agent-plan/SKILL.md   # Claude Code inline skill (generated)
 .claude-plugin/plugin.json      # Claude Code plugin manifest
 .claude-plugin/marketplace.json # Claude Code marketplace catalog
 .claude-plugin/icon.png         # plugin icon (generated)
 scripts/gen-icon.mjs            # generates the plugin icon
 ```
 
-The agent files and the icon are generated. To regenerate them after editing
-`src/prompt.md` or the icon design:
+The agents, skill and icon are generated. To regenerate them after editing
+`src/prompt.md`, the build configuration or the icon design:
 
 ```sh
-npm run build   # regenerate the agent artifacts
+npm run build   # regenerate the agent and skill artifacts
 npm run icon    # regenerate the plugin icon
 ```
 

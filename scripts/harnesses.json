@@ -6,6 +6,7 @@
   },
   "claude": {
     "artifact": "agents/planner.md",
+    "skillArtifact": "skills/let-agent-plan/SKILL.md",
     "questionTool": "AskUserQuestion",
     "plansDirectory": ".claude/plans"
   }

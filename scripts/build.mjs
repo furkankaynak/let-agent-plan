@@ -1,9 +1,10 @@
-// Generates the two agent artifacts from the single source of truth.
+// Generates two agents and a Claude Code skill from the single source of truth.
 //
 //   src/prompt.md            -> body (harness-specific placeholders templated)
 //   scripts/harnesses.json   -> artifact path, question tool, plans directory
 //   opencode/agents/planner.md -> OpenCode v2 artifact
 //   agents/planner.md          -> Claude Code artifact
+//   skills/let-agent-plan/SKILL.md -> Claude Code inline skill
 //
 // The frontmatter lives here in FRONTMATTER (it is NOT in src/prompt.md).
 // Edit `src/prompt.md`, `scripts/harnesses.json`, or the frontmatter below,
@@ -46,20 +47,31 @@ const harnesses = JSON.parse(
 
 const body = (await readFile(resolve(root, "src/prompt.md"), "utf8")).trim() + "\n"
 
+const SKILL_FRONTMATTER = `---
+name: let-agent-plan
+description: Research an idea, ask clarifying questions, and produce an implementable plan without implementing it.
+disable-model-invocation: true
+---
+`
+
 for (const [name, config] of Object.entries(harnesses)) {
   if (!(name in FRONTMATTER)) {
     throw new Error(`no frontmatter defined for harness "${name}"`)
   }
 
-  const content =
-    FRONTMATTER[name] +
-    "\n" +
-    body
-      .replaceAll("{{QUESTION_TOOL}}", config.questionTool)
-      .replaceAll("{{PLANS_DIRECTORY}}", config.plansDirectory)
+  const renderedBody = body
+    .replaceAll("{{QUESTION_TOOL}}", config.questionTool)
+    .replaceAll("{{PLANS_DIRECTORY}}", config.plansDirectory)
 
-  const path = resolve(root, config.artifact)
-  await mkdir(dirname(path), { recursive: true })
-  await writeFile(path, content)
-  console.log(`wrote ${config.artifact}`)
+  const targets = [{ file: config.artifact, frontmatter: FRONTMATTER[name] }]
+  if (config.skillArtifact) {
+    targets.push({ file: config.skillArtifact, frontmatter: SKILL_FRONTMATTER })
+  }
+
+  for (const { file, frontmatter } of targets) {
+    const path = resolve(root, file)
+    await mkdir(dirname(path), { recursive: true })
+    await writeFile(path, frontmatter + "\n" + renderedBody)
+    console.log(`wrote ${file}`)
+  }
 }
