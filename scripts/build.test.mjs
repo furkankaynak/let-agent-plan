@@ -1,6 +1,9 @@
 import assert from "node:assert/strict"
-import { readFile, readdir, stat } from "node:fs/promises"
-import { dirname, resolve } from "node:path"
+import { readFile, readdir, stat, mkdtemp, mkdir, writeFile, rm, lstat, realpath } from "node:fs/promises"
+import { dirname, resolve, join } from "node:path"
+import { tmpdir } from "node:os"
+import { execFile } from "node:child_process"
+import { promisify } from "node:util"
 import { fileURLToPath } from "node:url"
 import { test } from "node:test"
 import { renderArtifacts } from "./build.mjs"
@@ -11,6 +14,25 @@ const prompt = await read("src/prompt.md")
 const harnesses = JSON.parse(await read("scripts/harnesses.json"))
 const artifacts = renderArtifacts(prompt, harnesses)
 const artifact = (file) => artifacts.find((entry) => entry.file === file).content
+const exec = promisify(execFile)
+const guides = ["README.md", "claude/README.md", "opencode/README.md", "skills/planner/README.md"]
+
+// GitHub heading fragments, excluding examples inside fenced code blocks.
+function anchors(markdown) {
+  const seen = new Map()
+  return new Set(
+    markdown.replace(/^```[^\n]*\n[\s\S]*?^```/gm, "")
+      .split("\n")
+      .filter((line) => /^#{1,6} /.test(line))
+      .map((line) => {
+        const slug = line.replace(/^#+ /, "").toLowerCase()
+          .replace(/[^\p{L}\p{N}_\-\s]/gu, "").replace(/\s/g, "-")
+        const count = seen.get(slug) ?? 0
+        seen.set(slug, count + 1)
+        return count ? `${slug}-${count}` : slug
+      }),
+  )
+}
 
 test("all four committed artifacts match the shared source and have no placeholders", async () => {
   assert.equal(artifacts.length, 4)
@@ -119,8 +141,12 @@ test("marketplace points to a self-contained plugin with stable published names"
 test("README recommendations, guide links and release paths stay current", async () => {
   const readme = await read("README.md")
   const alternative = readme.indexOf("## Alternative: skill-only installation via skills.sh")
-  assert.ok(alternative > readme.indexOf("## Claude Code — recommended: plugin"))
-  assert.ok(alternative > readme.indexOf("## OpenCode v2 — recommended: primary agent"))
+  const claude = readme.indexOf("### Claude Code — recommended: plugin")
+  const opencode = readme.indexOf("### OpenCode v2 — recommended: primary agent")
+  assert.ok(claude >= 0)
+  assert.ok(opencode >= 0)
+  assert.ok(alternative > claude)
+  assert.ok(alternative > opencode)
   assert.match(readme, /--skill planner/)
   assert.match(readme, /\/let-agent-plan:planner /)
   assert.doesNotMatch(readme, /let-agent-plan:let-agent-plan/)
@@ -128,13 +154,83 @@ test("README recommendations, guide links and release paths stay current", async
   assert.match(maintenance, /claude plugin tag \.\/claude --push/)
   assert.match(maintenance, /claude\/\.claude-plugin\/plugin.json/)
   assert.doesNotMatch(maintenance, /claude plugin tag \.claude-plugin/)
-  for (const file of ["README.md", "claude/README.md", "opencode/README.md", "skills/planner/README.md"]) {
+  for (const file of guides) {
     const text = await read(file)
     for (const [, link] of text.matchAll(/\]\(([^)]+)\)/g)) {
-      if (/^(https?:|#)/.test(link)) continue
-      await stat(resolve(root, dirname(file), link.split("#")[0]))
+      if (/^https?:/.test(link)) continue
+      const [path, fragment] = link.split("#")
+      const target = path ? resolve(root, dirname(file), path) : resolve(root, file)
+      await stat(target)
+      if (fragment && target.endsWith(".md")) {
+        assert.ok(anchors(await readFile(target, "utf8")).has(decodeURIComponent(fragment)),
+          `${file}: missing heading for ${link}`)
+      }
     }
   }
+})
+
+test("both native starts precede the long example and describe the first request", async () => {
+  const readme = await read("README.md")
+  const example = readme.indexOf("## From an idea to decisions: a real example")
+  const start = readme.slice(0, example)
+  assert.ok(example > 0)
+  assert.match(start, /claude plugin marketplace add furkankaynak\/let-agent-plan/)
+  assert.match(start, /claude plugin install let-agent-plan@let-agent-plan/)
+  assert.match(start, /raw\.githubusercontent\.com\/furkankaynak\/let-agent-plan\/main\/opencode\/agents\/planner\.md/)
+  assert.match(start, /cd \/path\/to\/your-project/)
+  assert.match(start, /\/let-agent-plan:planner Plan adding team invitations/)
+  assert.match(start, /built-in Plan mode/)
+  assert.match(start, /model access, usage limits and costs/)
+  for (const file of ["claude/README.md", "opencode/README.md"]) {
+    const text = await read(file)
+    assert.match(text, /cd \/path\/to\/your-project/)
+    assert.match(text, /Plan adding team invitations to this app\./)
+    assert.match(text, /## What happens next/)
+    assert.match(text, /## Troubleshooting/)
+    assert.match(text, /first milestone/)
+    assert.match(text, /migrate-from-the-old-skill-name/)
+    assert.match(text, /full plan in chat/)
+  }
+})
+
+test("documented symlink steps work with a checkout and no existing agent directory", {
+  skip: process.platform === "win32" ? "The documented symlink alternative uses a POSIX shell" : false,
+}, async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "let-agent-plan-onboarding-"))
+  t.after(() => rm(directory, { recursive: true, force: true }))
+  const home = join(directory, "home with spaces")
+  const source = join(home, "let-agent-plan/opencode/agents/planner.md")
+  await mkdir(dirname(source), { recursive: true })
+  await writeFile(source, await read("opencode/agents/planner.md"))
+  await assert.rejects(stat(join(home, ".config/opencode/agents")), { code: "ENOENT" })
+  const guide = await read("opencode/README.md")
+  const block = [...guide.matchAll(/```sh\n([\s\S]*?)```/g)]
+    .map(([, commands]) => commands).find((commands) => commands.includes("ln -sf"))
+  assert.ok(block, "Missing documented symlink installation")
+  // The fixture represents the already-cloned checkout; no network or fake git.
+  const commands = block.split("\n").filter((line) => !line.startsWith("git clone ")).join("\n")
+  await exec("/bin/sh", ["-eu", "-c", commands], {
+    cwd: directory, env: { ...process.env, HOME: home },
+  })
+  const target = join(home, ".config/opencode/agents/planner.md")
+  assert.ok((await lstat(target)).isSymbolicLink())
+  assert.equal(await realpath(target), await realpath(source))
+  assert.equal(await readFile(target, "utf8"), artifact("opencode/agents/planner.md"))
+})
+
+test("social preview is a self-contained source and a GitHub-sized PNG", async () => {
+  const svg = await read("assets/social/let-agent-plan.svg")
+  assert.match(svg, /width="1280" height="640"/)
+  assert.match(svg, /<title[^>]*>let-agent-plan/)
+  assert.match(svg, /Claude Code/)
+  assert.match(svg, /OpenCode v2/)
+  assert.doesNotMatch(svg, /<script|<foreignObject|(?:href|src)=["']https?:/i)
+  const png = await readFile(resolve(root, "assets/social/let-agent-plan.png"))
+  assert.deepEqual(png.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+  assert.equal(png.toString("ascii", 12, 16), "IHDR")
+  assert.equal(png.readUInt32BE(16), 1280)
+  assert.equal(png.readUInt32BE(20), 640)
+  assert.ok(png.length < 1_000_000, "GitHub social previews must be under 1 MB")
 })
 
 test("standalone distributions include the repository license", async () => {

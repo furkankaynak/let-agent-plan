@@ -1,47 +1,115 @@
 # let-agent-plan
 
-**Better questions. Fewer assumptions. A plan you can build.**
+**Resolve the decisions before your coding agent builds.**
 
-A planning agent and skill for **Claude Code** and **OpenCode v2**. It researches
-your idea and codebase, surfaces the decisions that matter, and works through
-them with you before producing an implementation-ready plan. It plans; it does
-not implement.
+An interactive planning workflow for **Claude Code** and **OpenCode v2**.
+It researches your project, challenges assumptions, and works through the
+important decisions with you. You leave with a Markdown plan—not source-code
+changes.
 
-For the moments when you know what you want to build, but not yet everything
-that needs to be decided.
+[Watch the real demo](#watch-a-real-planning-session) ·
+[See a decision become a plan](#from-an-idea-to-decisions-a-real-example)
+
+## Start here
+
+Choose the tool you already use; install only its recommended distribution:
+
+| Your tool | Start with | What it adds |
+| --- | --- | --- |
+| **Claude Code** | [Install the plugin](#claude-code--recommended-plugin) | An explicitly invoked planning skill in your conversation. |
+| **OpenCode v2** | [Install the primary agent](#opencode-v2--recommended-primary-agent) | A selectable `planner` agent for interactive planning. |
+
+You need a working setup and model access for your chosen tool. The planner is MIT
+licensed; your tool's model access, usage limits and costs still apply.
+Need the tool itself? See the [Claude Code guide](claude/README.md#install-claude-code)
+or [OpenCode v2 guide](opencode/README.md#install-opencode-v2).
+
+### Claude Code — recommended: plugin
+
+Install from your terminal:
+
+```sh
+claude plugin marketplace add furkankaynak/let-agent-plan
+claude plugin install let-agent-plan@let-agent-plan
+```
+
+Open **the project you want to plan**, not this plugin's repository, in a normal
+Claude Code session (not built-in Plan mode):
+
+```sh
+cd /path/to/your-project
+claude
+```
+
+Invoke the skill with a concrete feature request, for example:
+
+```text
+/let-agent-plan:planner Plan adding team invitations to this app. Read the existing code first. Help me define a small v1. Do not implement anything.
+```
+
+The skill starts only when invoked and keeps questions in the current
+conversation. [Claude Code guide: updates, alternatives and troubleshooting](claude/README.md).
+
+### OpenCode v2 — recommended: primary agent
+
+Install from your terminal (macOS / Linux). If you already have a custom
+`~/.config/opencode/agents/planner.md`, back it up first; this replaces that file.
+
+```sh
+mkdir -p ~/.config/opencode/agents
+curl -fsSL https://raw.githubusercontent.com/furkankaynak/let-agent-plan/main/opencode/agents/planner.md \
+  -o ~/.config/opencode/agents/planner.md
+```
+
+Open **the project you want to plan**, then select **`planner`** from OpenCode's
+agent list:
+
+```sh
+cd /path/to/your-project
+opencode
+```
+
+Send the same example request, without a slash command:
+
+```text
+Plan adding team invitations to this app. Read the existing code first. Help me define a small v1. Do not implement anything.
+```
+
+[OpenCode guide: symlink installation, updates and troubleshooting](opencode/README.md).
+
+### What happens next?
+
+**Research → understanding map → questions → scope confirmation → full plan.**
+
+This is a conversation, not an instant outline: answer the questions and confirm
+the scope before the planner designs the solution. It presents the full plan in
+chat and, when saving succeeds, writes it inside your project. For a new idea,
+open an empty target directory first and describe the idea instead of the example
+feature above. There is no fixed session duration or question count.
+
+## Why not just use built-in Plan mode?
+
+Already know the scope and decisions? Your agent's built-in Plan mode may be
+enough. Use `planner` when **the decisions themselves need work**: who it is for,
+what belongs in v1, what can fail, and how your answers change the delivery plan.
+
+It reads the relevant context before asking, separates facts from assumptions,
+explains trade-offs with concrete scenarios, and confirms scope before design.
+Those decisions feed into milestones, dependencies and testable acceptance
+criteria. The distinction is this prescribed decision-making workflow—not that
+built-in modes cannot research or ask questions.
+
+See it in practice below, or [jump to the output and handoff](#what-you-leave-with).
+
+## Watch a real planning session
 
 ![OpenCode planner demo: all 14 questions, scope confirmation, plan approval and an excerpt of the saved plan](assets/demo/planner-demo.gif)
 
-*34-second edit of a real OpenCode session: all 14 questions held for 2 seconds
-each, other session screens for 0.5 seconds, then a labelled excerpt of the saved
-plan for 2 seconds. Waiting omitted; implementation stays a separate step.*
-
-[Claude Code setup](#claude-code--recommended-plugin) ·
-[OpenCode setup](#opencode-v2--recommended-primary-agent) ·
-[Real example](#from-an-idea-to-decisions-a-real-example) ·
-[Portable skill](#alternative-skill-only-installation-via-skillssh)
-
-## Don't let a good idea become a pile of assumptions
-
-"Build this feature" leaves a lot unsaid: who it is for, what belongs in v1,
-what happens when something fails, and which choices will be expensive to undo.
-A detailed plan is not useful if it confidently answers the wrong questions.
-
-`planner` is designed to work those decisions out with you:
-
-- **Research first, ask second.** Read the relevant code and supplied context
-  before asking you something they already answer.
-- **Make uncertainty visible.** Separate what is known, assumed and still open;
-  look for the reasons the project could disappoint before committing to a design.
-- **Ask questions worth answering.** Use concrete scenarios, explain the
-  consequences of each option, and recommend a direction with a reason.
-- **Let your answers change the plan.** Revisit the understanding after each
-  round, resolve contradictions, and confirm the scope before designing.
-- **Keep v1 focused.** Name what is deliberately out of scope and organize work
-  into small, demonstrable increments—not disconnected infrastructure tasks.
-
-Four perspectives in one workflow: **Analyst, Product Owner, Software Architect
-and Scrum Master**. The goal is not a longer plan. It is fewer expensive guesses.
+*34-second edit of a real OpenCode session—not the time needed to make the plan.
+All 14 questions are held for 2 seconds each, other session screens for 0.5
+seconds, then a labelled excerpt of the saved plan for 2 seconds. Waiting omitted;
+implementation stays a separate step. Prefer a static example? See the question
+and decision table below.*
 
 ## From an idea to decisions: a real example
 
@@ -147,84 +215,30 @@ Use it for a **new project**, a **feature in an existing codebase**, or an idea
 whose scope needs challenging before anyone starts coding. Small ideas should
 still get small plans.
 
----
+## Review the plan, then build separately
 
-## Claude Code — recommended: plugin
+Read the full plan in chat and, if saved, in your project's plan directory:
 
-Install the plugin from the marketplace:
+| Distribution | Plan directory |
+| --- | --- |
+| Claude Code plugin | `.claude/plans/` |
+| OpenCode primary agent | `.opencode/plans/` |
+| Portable skill | `plans/` |
 
-```sh
-claude plugin marketplace add furkankaynak/let-agent-plan
-claude plugin install let-agent-plan@let-agent-plan
-```
+Approve the plan or request changes. Claude Code asks permission before writing
+to its protected `.claude/plans/` path; if saving is denied or blocked, you still
+get the full plan in chat. In any distribution, check the reported save status
+rather than assuming a file was created.
 
-**Recommended:** start Claude Code in normal mode (not built-in Plan mode),
-then invoke the skill in your conversation:
+When you are ready to build, open a **separate implementation session**, give it
+the approved plan's path (or paste the plan if it was not saved), and start with:
 
-```text
-/let-agent-plan:planner plan this feature for me
-```
+> Read the approved plan and implement only its first milestone. Keep later
+> milestones out of scope.
 
-The plugin installs both the skill and the existing agent. The skill starts
-only when you invoke it and runs in the current conversation, not a forked
-subagent, so questions and answers stay in the same session. It does not impose
-tool restrictions; normal session permissions apply.
-
-Claude Code namespaces plugin skills as `/plugin-name:skill-name`; the plugin's
-skill is therefore `/let-agent-plan:planner`. There is no documented plugin
-setting to remove that prefix. A standalone project or personal skill can be
-invoked as `/planner` instead; see the [skill naming documentation](https://code.claude.com/docs/en/skills#where-skills-live).
-
-Alternatively, run the existing agent as the main session agent:
-
-```sh
-claude --agent let-agent-plan:planner
-```
-
-> [!NOTE]
-> The agent remains available as `@let-agent-plan:planner`, but subagents
-> cannot call `AskUserQuestion`. For interactive planning, use the skill above
-> or run the agent as the main session.
->
-> Saving to `.claude/plans/` is a protected-path write, so Claude Code asks for
-> your approval before creating the plan file. If saving is denied or blocked,
-> the full plan is still delivered in chat.
-
-See the [Claude Code guide](claude/README.md) for setup, updates and local use.
-
----
-
-## OpenCode v2 — recommended: primary agent
-
-One-liner (no clone needed):
-
-```sh
-mkdir -p ~/.config/opencode/agents
-curl -fsSL https://raw.githubusercontent.com/furkankaynak/let-agent-plan/main/opencode/agents/planner.md \
-  -o ~/.config/opencode/agents/planner.md
-```
-
-Or clone the repo and symlink it (easier to keep updated):
-
-```sh
-git clone https://github.com/furkankaynak/let-agent-plan.git ~/let-agent-plan
-ln -sf "$HOME/let-agent-plan/opencode/agents/planner.md" ~/.config/opencode/agents/planner.md
-```
-
-Run OpenCode and switch to the `planner` agent (press **Tab** to cycle agents, or
-pick it from the agent list). Or set it as the default in `opencode.jsonc`:
-
-```jsonc
-{
-  "$schema": "https://opencode.ai/config.json",
-  "default_agent": "planner"
-}
-```
-
-See the [OpenCode guide](opencode/README.md) for setup and updates. The existing
-`opencode/agents/planner.md` download and symlink paths are unchanged.
-
----
+The planner does not switch into implementation. Need help getting started?
+See [Claude troubleshooting](claude/README.md#troubleshooting) or
+[OpenCode troubleshooting](opencode/README.md#troubleshooting).
 
 ## Planning, not implementation
 

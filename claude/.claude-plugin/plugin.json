@@ -1,7 +1,7 @@
 {
   "name": "let-agent-plan",
   "description": "A read-only plan-mode agent that researches, plans and asks — never implements.",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "author": {
     "name": "Furkan Kaynak"
   },
