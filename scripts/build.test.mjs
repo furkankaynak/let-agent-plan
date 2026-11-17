@@ -43,9 +43,23 @@ test("portable skill waits for answers and falls back to chat without native dep
   assert.match(generic, /stop and wait for the user's answers before continuing/)
   assert.match(generic, /`plans\/\{yyyyMMddHHmm\}-let-me-plan-\{plan_name\}\.md`/)
   assert.match(generic, /don't overwrite an existing file/)
-  assert.match(generic, /on failure give the full plan in chat and say it wasn't saved/)
+  assert.match(generic, /On failure, present the full plan in chat and explicitly say it wasn't saved/)
   assert.match(generic, /Do not implement anything/)
   assert.doesNotMatch(generic, /AskUserQuestion|\.claude\/|\.opencode\/|disable-model-invocation|tools:|permissions:/)
+})
+
+test("every distribution saves and presents the full plan before asking for approval", () => {
+  for (const { content } of artifacts) {
+    assert.match(content, /The only file you may create or modify is the finished plan file\./)
+    assert.match(content, /Before asking approval, write the full plan to/)
+    assert.match(content, /On success, report the saved path, then present the full final plan in chat, including all sections and diagrams\./)
+    assert.match(content, /A path or summary alone is not sufficient\./)
+    assert.match(content, /On failure, present the full plan in chat and explicitly say it wasn't saved\./)
+    assert.match(content, /The saved file and the plan shown in chat must contain the same plan\./)
+    assert.match(content, /Create or modify no files other than the plan file\./)
+    assert.match(content, /Then ask for approval using the question policy and wait\. Do not implement anything\./)
+    assert.doesNotMatch(content, /write exactly one thing|Write nothing else\./)
+  }
 })
 
 test("a new skill-only harness needs no new frontmatter or agent", () => {

@@ -54,8 +54,10 @@ designs a proportionate solution and produces a plan with acceptance criteria.
 
 Plans are saved at the project root as
 `plans/{yyyyMMddHHmm}-let-me-plan-{plan_name}.md`. Existing files are not
-overwritten. If the session cannot write there, it returns the full plan in chat
-and reports that saving failed. It stops for approval without implementing.
+overwritten. After saving, it reports the path and presents the same full plan
+in chat, including all sections and diagrams, before asking for approval. If the
+session cannot write there, it still returns the full plan in chat and reports
+that saving failed. It stops for approval without implementing.
 Your agent's normal permissions still apply; do not enable a separate built-in
 planning mode if that mode prevents the required interaction or plan-file write.
 

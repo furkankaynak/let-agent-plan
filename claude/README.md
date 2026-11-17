@@ -51,8 +51,10 @@ claude --agent let-agent-plan:planner
 
 The agent also appears as `@let-agent-plan:planner`, but subagents cannot call
 `AskUserQuestion`. Use the inline skill or the main session agent for interactive
-planning. Saving to `.claude/plans/` requires approval; if blocked, the full plan
-is delivered in chat.
+planning. Saving to `.claude/plans/` requires approval. After saving, it reports
+the path and presents the same full plan in chat, including all sections and
+diagrams, before asking for plan approval. If saving is blocked, it still delivers
+the full plan in chat and reports that it wasn't saved.
 
 ## Why the plugin prefix?
 

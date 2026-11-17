@@ -45,6 +45,11 @@ Switch to `planner` in OpenCode's agent list, or set `default_agent` to `planner
 in your OpenCode configuration. It researches, asks and writes the finished plan;
 it does not implement source changes.
 
+After saving, it reports the path and presents the same full plan in chat,
+including all sections and diagrams, before asking for approval through the
+`question` tool. If saving fails, it still delivers the full plan in chat and
+reports that it wasn't saved.
+
 To update a downloaded copy, repeat the download. For a symlinked checkout, pull
 the latest repository changes. Start a fresh session to pick up the new prompt.
 The existing artifact path and installation method are unchanged.

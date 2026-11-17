@@ -234,6 +234,9 @@ See the [OpenCode guide](opencode/README.md) for setup and updates. The existing
   `.opencode/plans/` (OpenCode), `.claude/plans/` (Claude plugin), or `plans/`
   (portable skill) — named
   `{yyyyMMddHHmm}-let-me-plan-{plan_name}.md`, so it survives the session.
+- Presents the same full plan in chat, including all sections and diagrams,
+  before asking for approval—not just a saved path or summary. If saving fails,
+  it still delivers the full plan in chat and reports that it wasn't saved.
 - Works toward an approved plan through research, questions and design;
   implementation stays a separate step.
 
