@@ -10,10 +10,11 @@ not implement.
 For the moments when you know what you want to build, but not yet everything
 that needs to be decided.
 
-![OpenCode planner demo: an RPG idea, clarifying questions, scope confirmation and a saved plan](assets/demo/planner-demo.gif)
+![OpenCode planner demo: all 14 questions, scope confirmation, plan approval and an excerpt of the saved plan](assets/demo/planner-demo.gif)
 
-*29-second edited highlights from a real OpenCode session. Waiting and tool
-execution omitted; implementation stays a separate step.*
+*34-second edit of a real OpenCode session: all 14 questions held for 2 seconds
+each, other session screens for 0.5 seconds, then a labelled excerpt of the saved
+plan for 2 seconds. Waiting omitted; implementation stays a separate step.*
 
 [Claude Code setup](#claude-code--recommended-plugin) ·
 [OpenCode setup](#opencode-v2--recommended-primary-agent) ·
@@ -78,6 +79,56 @@ The result: **four playable milestones**, first-milestone tasks, architecture
 diagrams, dependencies and testable acceptance criteria. A saved Markdown plan;
 no game source code changed. This is one example, not a fixed template or promise
 of identical results from every model.
+
+<details>
+<summary>See inside the resulting plan: architecture, milestones and a task</summary>
+
+Selected excerpts from the same session's saved plan—not an implemented game.
+
+### Architecture
+
+Component boundaries: all gameplay executes in the browser; the host only delivers static files.
+
+```mermaid
+flowchart LR
+  Host["Static HTTPS host"] --> Assets["Static files"]
+  Assets --> Content["Content catalog"]
+  Assets --> Phaser["Phaser presentation"]
+  UI["Browser shell"] --> Game["Session coordinator"]
+  Game --> Rules["Combat and progression"]
+  Game --> World["World and navigation"]
+  Game --> Phaser
+  Game --> Save["Save adapter"]
+  Save --> Local["localStorage"]
+  Content --> Game
+```
+
+*Condensed from the plan's component diagram.*
+
+### Four playable milestones
+
+1. **Fight, lose, recover, and continue** in a real isometric scene.
+2. **Change builds** and make persistent advancement choices.
+3. **Explore and complete** the authored region.
+4. **Recover gracefully and release** the playable foundation.
+
+### Example task: T4 — Die, retry, and reclaim currency
+
+**Objective:** close the field → death → checkpoint → recovery journey.
+
+**Scope:** F3 death outcome, checkpoint rest/respawn, transient reset, recovery
+marker and safe marker placement. Persistence follows in T5; this session
+verifies the real in-session loop, not a stub save.
+
+**Acceptance:** death zeros the wallet, retains durable state, resets the enemy
+and restores checkpoint resources; reaching the marker adds its amount once.
+Dying again replaces the marker even with an empty wallet. Marker placement
+falls back to reachable ground. Rule tests cover replacement and double
+recovery; browser test performs death/reclaim and rest/reset.
+
+**dependsOn:** T3.
+
+</details>
 
 ## What you leave with
 
