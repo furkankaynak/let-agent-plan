@@ -1,12 +1,100 @@
 # let-agent-plan
 
-A planning assistant that researches, plans and asks clarifying questions —
-and never implements. Use the **Claude Code plugin** or the **OpenCode v2 primary
-agent** for the harness-specific experience. A separate, portable skill is also
-available through the [skills CLI](https://skills.sh/docs/cli).
+**Better questions. Fewer assumptions. A plan you can build.**
 
-The agent is named **`planner`**. In Claude Code it appears scoped under the
-plugin name as `let-agent-plan:planner`.
+A planning agent and skill for **Claude Code** and **OpenCode v2**. It researches
+your idea and codebase, surfaces the decisions that matter, and works through
+them with you before producing an implementation-ready plan. It plans; it does
+not implement.
+
+For the moments when you know what you want to build, but not yet everything
+that needs to be decided.
+
+![OpenCode planner demo: an RPG idea, clarifying questions, scope confirmation and a saved plan](assets/demo/planner-demo.gif)
+
+*29-second edited highlights from a real OpenCode session. Waiting and tool
+execution omitted; implementation stays a separate step.*
+
+[Claude Code setup](#claude-code--recommended-plugin) ·
+[OpenCode setup](#opencode-v2--recommended-primary-agent) ·
+[Real example](#from-an-idea-to-decisions-a-real-example) ·
+[Portable skill](#alternative-skill-only-installation-via-skillssh)
+
+## Don't let a good idea become a pile of assumptions
+
+"Build this feature" leaves a lot unsaid: who it is for, what belongs in v1,
+what happens when something fails, and which choices will be expensive to undo.
+A detailed plan is not useful if it confidently answers the wrong questions.
+
+`planner` is designed to work those decisions out with you:
+
+- **Research first, ask second.** Read the relevant code and supplied context
+  before asking you something they already answer.
+- **Make uncertainty visible.** Separate what is known, assumed and still open;
+  look for the reasons the project could disappoint before committing to a design.
+- **Ask questions worth answering.** Use concrete scenarios, explain the
+  consequences of each option, and recommend a direction with a reason.
+- **Let your answers change the plan.** Revisit the understanding after each
+  round, resolve contradictions, and confirm the scope before designing.
+- **Keep v1 focused.** Name what is deliberately out of scope and organize work
+  into small, demonstrable increments—not disconnected infrastructure tasks.
+
+Four perspectives in one workflow: **Analyst, Product Owner, Software Architect
+and Scrum Master**. The goal is not a longer plan. It is fewer expensive guesses.
+
+## From an idea to decisions: a real example
+
+In a recorded OpenCode session, the starting idea was a **browser-based,
+isometric pixel-art soulslike RPG**. Before choosing an architecture, the planner
+worked through the combat identity, world scope, progression, death, saves and
+asset constraints with the user.
+
+One of its actual questions:
+
+> A player dies carrying upgrade currency, then dies again while trying to
+> recover it. What should happen? I recommend the classic recoverable loss
+> to retain soulslike stakes while preserving earned equipment and upgrades.
+
+The options explained how recoverable currency, gentler death, or run-based
+loss would change the game—not just which one sounded preferable.
+
+<details>
+<summary>See the actual question and its options (static image)</summary>
+
+![Planner asks what happens after a second death and explains three options: recoverable currency, gentler death and run-based loss](assets/demo/planner-question.png)
+
+</details>
+
+Those answers became explicit rules in the finished plan:
+
+| Decision | What the plan specifies |
+| --- | --- |
+| Death and recovery | One recoverable currency marker; another death replaces it. Equipment and upgrades remain. |
+| Closing the browser | Progression is saved; reopening starts at the checkpoint, not halfway through combat. |
+| Limited art assets | Prove combat readability early with licensed assets and limited animation; do not silently abandon isometric pixel art. |
+| First-release scope | One hub, one dungeon, three combat kits and one boss—not a full campaign. |
+
+The result: **four playable milestones**, first-milestone tasks, architecture
+diagrams, dependencies and testable acceptance criteria. A saved Markdown plan;
+no game source code changed. This is one example, not a fixed template or promise
+of identical results from every model.
+
+## What you leave with
+
+- **A confirmed brief:** problem, users, requirements and a clear v1 boundary.
+- **A decision record:** your answers, trade-offs, rejected alternatives and
+  assumptions kept separate from verified facts.
+- **A technical design:** components, data flow, architecture and sequence
+  diagrams; relevant code references and research sources.
+- **A delivery plan:** value/risk-ordered milestones, features, dependencies,
+  acceptance criteria and focused tasks for the first milestone (all tasks for
+  small plans).
+- **A durable handoff:** one Markdown file you can review, revise, and use in a
+  separate implementation session.
+
+Use it for a **new project**, a **feature in an existing codebase**, or an idea
+whose scope needs challenging before anyone starts coding. Small ideas should
+still get small plans.
 
 ---
 
@@ -87,7 +175,7 @@ See the [OpenCode guide](opencode/README.md) for setup and updates. The existing
 
 ---
 
-## What it does
+## Planning, not implementation
 
 - **Never implements.** It researches (files + web), plans and asks — it does
   not edit your source code. Its only write is the finished plan file (below).
@@ -95,14 +183,17 @@ See the [OpenCode guide](opencode/README.md) for setup and updates. The existing
   `.opencode/plans/` (OpenCode), `.claude/plans/` (Claude plugin), or `plans/`
   (portable skill) — named
   `{yyyyMMddHHmm}-let-me-plan-{plan_name}.md`, so it survives the session.
-- Four roles in one: Analyst, Product Owner, Scrum Master, Software Architect.
-- Turns one idea into an approved, implementable plan in a single session.
+- Works toward an approved plan through research, questions and design;
+  implementation stays a separate step.
 
 The skills instruct the model not to implement; they do not enforce a tool
 sandbox. Normal session permissions apply. The OpenCode agent additionally
 declares edit permissions in its harness-specific configuration.
 
-## Repo layout
+<details>
+<summary>Development: repo layout, generated files and migration notes</summary>
+
+### Repo layout
 
 ```
 src/prompt.md                              # shared prompt source
@@ -151,6 +242,8 @@ remove the old skill in its installed scope and install `planner` instead. See
 the [portable skill guide](skills/planner/README.md). The plugin and repository
 names stay `let-agent-plan`; the Claude agent name is unchanged.
 
+</details>
+
 ## Alternative: skill-only installation via skills.sh
 
 **For Claude Code, prefer the plugin above. For OpenCode v2, prefer the primary
@@ -181,6 +274,14 @@ selection, updates and removal. The intended directory page is
 Installation uses GitHub directly and does not depend on that page being indexed.
 skills.sh lists skills through installation telemetry; visibility and cache
 refreshes may lag behind a successful install. There is no separate npm publish.
+
+## Show what you planned
+
+Tried it on a real project? Share a question that changed your approach or a
+sanitized excerpt of the resulting plan in
+[an issue](https://github.com/furkankaynak/let-agent-plan/issues).
+Concrete examples and feedback help improve the planner. If it helped you,
+consider starring the repo so you can find it again.
 
 ## License
 
